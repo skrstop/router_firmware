@@ -12,6 +12,8 @@ name: AX6-immortalwrt
 
 on:
   repository_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
   workflow_dispatch:
     inputs:
       ssh:
