@@ -26,8 +26,8 @@ env:
   REPO_BRANCH: master-ax3000-5.15
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: ax6/AX6-5.15-immortalwrt.config
-  DIY_P1_SH: ax6/diy-part1-5.15-imoutowrt.sh
-  DIY_P2_SH: ax6/diy-part2-5.15-imoutowrt.sh
+  DIY_P1_SH: ax6/diy-part1-5.15-immortalwrt.sh
+  DIY_P2_SH: ax6/diy-part2-5.15-immortalwrt.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
