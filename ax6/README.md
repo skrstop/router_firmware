@@ -43,3 +43,20 @@ Boos4721源编译的固件特别说明：
 脚本文件：目前1-2都是编辑添加，修改好的。
 
 此次更新为Actions，自动拉取最新lede源码库，不需要任何修改，手动触发即可编译。
+
+
+## 安装软件
+1. ttyd
+2. wifischedule
+3. weburl
+4. adbyby
+5. speedtest-cli
+6. samba4 *
+7. nfs
+8. vsftpd
+9. wol
+10. apk
+11. guest-wifi
+12. Syncthing *
+13. aria2
+14. diskman
