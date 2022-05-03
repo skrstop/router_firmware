@@ -59,4 +59,4 @@ Boos4721源编译的固件特别说明：
 11. guest-wifi
 12. Syncthing *
 13. aria2 *
-14. diskman
+14. diskman *
