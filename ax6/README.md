@@ -52,11 +52,11 @@ Boos4721源编译的固件特别说明：
 4. adbyby
 5. speedtest-cli
 6. samba4 *
-7. nfs
-8. vsftpd
+7. nfs *
+8. vsftpd *
 9. wol
 10. apk
 11. guest-wifi
 12. Syncthing *
-13. aria2
+13. aria2 *
 14. diskman
