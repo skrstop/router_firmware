@@ -42,7 +42,7 @@ echo 'Modify default banner...'
 build_date=$(date +"%Y-%m-%d %H:%M:%S")
 sed -i 's|mv /etc/openwrt_banner /etc/banner||g' package/emortal/default-settings/files/99-default-settings
 
-git clone https://github.com/zzsj0928/luci-app-pushbot.git package/luci-app-pushbot
+#git clone https://github.com/zzsj0928/luci-app-pushbot.git package/luci-app-pushbot
 
 echo "                                                               " > package/base-files/files/etc/banner
 echo " ██████╗ ██████╗ ███████╗███╗   ██╗██╗    ██╗██████╗ ████████╗ " >>package/base-files/files/etc/banner
