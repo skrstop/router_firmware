@@ -25,7 +25,7 @@ env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
   REPO_BRANCH: openwrt-21.02
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: CR660x/CR660x-immortalwrt.config
+  CONFIG_FILE: CR660x/cr660x-immortalwrt.config
   DIY_P1_SH: CR660x/diy-part1-immortalwrt.sh
   DIY_P2_SH: CR660x/diy-part2-immortalwrt.sh
   PATCH_FILE: CR660x/cr660x.patch
