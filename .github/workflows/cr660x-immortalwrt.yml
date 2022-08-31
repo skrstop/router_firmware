@@ -28,7 +28,7 @@ env:
   CONFIG_FILE: cr660x/cr660x-immortalwrt.config
   DIY_P1_SH: cr660x/diy-part1-immortalwrt.sh
   DIY_P2_SH: cr660x/diy-part2-immortalwrt.sh
-  PATCH_FILE: cr660x/cr660x.patch
+#  PATCH_FILE: cr660x/cr660x.patch
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
@@ -83,8 +83,8 @@ jobs:
           [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
           chmod +x $DIY_P2_SH
           cd openwrt
-          pwd
-          git apply $GITHUB_WORKSPACE/$PATCH_FILE
+#          pwd
+#          git apply $GITHUB_WORKSPACE/$PATCH_FILE
           $GITHUB_WORKSPACE/$DIY_P2_SH
 
       - name: SSH connection to Actions
