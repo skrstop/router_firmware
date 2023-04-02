@@ -12,6 +12,10 @@
 export DATE_VERSION=$(date -d "$(rdate -n -4 -p pool.ntp.org)" +'%Y-%m-%d')
 sed -i "s/%C/%C (${DATE_VERSION})/g" package/base-files/files/etc/openwrt_release
 
+# Modify default LAN ip
+echo 'Modify default LAN IP...'
+sed -i 's/192.168.1.1/192.168.88.1/g' package/base-files/files/bin/config_generate
+
 # Fix mt76 wireless driver
 pushd package/kernel/mt76
 sed -i '/mt7662u_rom_patch.bin/a\\techo mt76-usb disable_usb_sg=1 > $\(1\)\/etc\/modules.d\/mt76-usb' Makefile
@@ -24,3 +28,17 @@ popd
 
 # Change default shell to zsh
 sed -i 's/\/bin\/ash/\/usr\/bin\/zsh/g' package/base-files/files/etc/passwd
+
+# soft
+echo 'src-git-full packages https://github.com/immortalwrt/packages.git' >> feeds.conf.default
+echo 'src-git-full luci https://github.com/immortalwrt/luci.git' >> feeds.conf.default
+echo 'src-git-full routing https://github.com/openwrt/routing.git' >> feeds.conf.default
+echo 'src-git-full telephony https://github.com/openwrt/telephony.git' >> feeds.conf.default
+echo '#src-git-full video https://github.com/openwrt/video.git' >> feeds.conf.default
+echo '#src-git-full targets https://github.com/openwrt/targets.git' >> feeds.conf.default
+echo '#src-git-full oldpackages http://git.openwrt.org/packages.git' >> feeds.conf.default
+
+# Add a feed source
+echo 'src-git helloworld https://github.com/fw876/helloworld' >>feeds.conf.default
+sed -i '$a src-git kenzo https://github.com/kenzok8/openwrt-packages' feeds.conf.default
+sed -i '$a src-git small https://github.com/kenzok8/small' feeds.conf.default
