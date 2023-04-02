@@ -24,6 +24,7 @@ env:
   CLASH_BINARY_PLATFORM: armv8
   TOOLCHAIN_RELEASE_UPLOAD: true
   FIRMWARE_RELEASE_UPLOAD: true
+  FEEDS_CONF: feeds.conf.default
   WEB_ROOT_PATH: /data/www/openwrt.cc
   TZ: Asia/Shanghai
 
@@ -280,6 +281,13 @@ jobs:
           sudo mount -t overlay overlay -o lowerdir=openwrt-ro,upperdir=overlay,workdir=workdir openwrt
           cd $OPENWRT_ROOT_PATH
           git pull
+
+      - name: Load custom feeds
+        run: |
+          [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+          chmod +x $GITHUB_WORKSPACE/respberry4b/scripts/feeds-add.sh
+          cd openwrt
+          $GITHUB_WORKSPACE/respberry4b/scripts/feeds-add.sh
 
       - name: Install Feeds
         run: |
