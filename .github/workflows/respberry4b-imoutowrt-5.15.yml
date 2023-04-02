@@ -6,7 +6,7 @@
 # Blog: https://p3terx.com
 #=================================================
 
-name: Build respberry4b-5.15 openwrt
+name: Respberry4B imoutowrt 5.15
 
 on:
   workflow_dispatch:
