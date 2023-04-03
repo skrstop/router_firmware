@@ -8,6 +8,7 @@ echo '#src-git-full video https://github.com/openwrt/video.git' >> feeds.conf.de
 echo '#src-git-full targets https://github.com/openwrt/targets.git' >> feeds.conf.default
 echo '#src-git-full oldpackages http://git.openwrt.org/packages.git' >> feeds.conf.default
 echo '#src-link custom /usr/src/openwrt/custom-feed' >> feeds.conf.default
+echo '#src-git-full oldpackages http://git.openwrt.org/packages.git' >> feeds.conf.default
 
 # Add a feed source
 echo 'src-git helloworld https://github.com/fw876/helloworld' >>feeds.conf.default
