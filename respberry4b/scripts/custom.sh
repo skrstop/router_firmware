@@ -13,17 +13,17 @@ export DATE_VERSION=$(date -d "$(rdate -n -4 -p pool.ntp.org)" +'%Y-%m-%d')
 sed -i "s/%C/%C (${DATE_VERSION})/g" package/base-files/files/etc/openwrt_release
 
 # Modify default LAN ip
-echo 'Modify default LAN IP...'
-sed -i 's/192.168.1.1/192.168.88.1/g' package/base-files/files/bin/config_generate
+#echo 'Modify default LAN IP...'
+#sed -i 's/192.168.1.1/192.168.88.1/g' package/base-files/files/bin/config_generate
 
 # Fix mt76 wireless driver
 pushd package/kernel/mt76
 sed -i '/mt7662u_rom_patch.bin/a\\techo mt76-usb disable_usb_sg=1 > $\(1\)\/etc\/modules.d\/mt76-usb' Makefile
 popd
 
-# Rename hostname to OpenWrt
+# Rename hostname to Respberry
 pushd package/base-files/files/bin
-sed -i 's/ImmortalWrt/OpenWrt/g' config_generate
+sed -i 's/ImmortalWrt/Respberry/g' config_generate
 popd
 
 # Change default shell to zsh

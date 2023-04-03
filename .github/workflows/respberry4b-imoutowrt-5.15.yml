@@ -17,8 +17,8 @@ on:
 
 env:
   CONFIG_FILE: respberry4b/respberry4b.config
-  SOURCE_URL: https://github.com/1715173329/imoutowrt
-  SOURCE_BRANCH: master-ax3000-5.15
+  SOURCE_URL: https://github.com/immortalwrt/immortalwrt.git
+  SOURCE_BRANCH: master
   DIY_SH: respberry4b/scripts/custom.sh
   TOOLCHAIN_TAG: toolchain
   CLASH_BINARY_PLATFORM: armv8
