@@ -289,12 +289,12 @@ jobs:
           cd $OPENWRT_ROOT_PATH
           git pull
 
-      - name: Load custom feeds
-        run: |
-          [ -e $FEEDS_CONF ] && mv $FEEDS_CONF cd $OPENWRT_ROOT_PATH/feeds.conf.default
-          chmod +x $GITHUB_WORKSPACE/respberry4b/scripts/feeds-add.sh
-          cd $OPENWRT_ROOT_PATH
-          $GITHUB_WORKSPACE/respberry4b/scripts/feeds-add.sh
+#      - name: Load custom feeds
+#        run: |
+#          [ -e $FEEDS_CONF ] && mv $FEEDS_CONF cd $OPENWRT_ROOT_PATH/feeds.conf.default
+#          chmod +x $GITHUB_WORKSPACE/respberry4b/scripts/feeds-add.sh
+#          cd $OPENWRT_ROOT_PATH
+#          $GITHUB_WORKSPACE/respberry4b/scripts/feeds-add.sh
 
       - name: Install Feeds
         run: |
