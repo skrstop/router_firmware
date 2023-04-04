@@ -217,6 +217,7 @@ jobs:
 
       - name: Combine Disks
         run: |
+          sudo rm -f /mnt/swapfile
           export ROOT_FREE_KB=$(df --block-size=1024 --output=avail / | tail -1)
           export ROOT_LOOP_KB=$(expr $ROOT_FREE_KB - 1048576)
           export ROOT_LOOP_BYTES=$(expr $ROOT_LOOP_KB \* 1024)
