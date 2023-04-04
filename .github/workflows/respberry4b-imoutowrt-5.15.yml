@@ -244,13 +244,13 @@ jobs:
 #           df -hT $GITHUB_WORKSPACE
 #           sudo btrfs filesystem usage $GITHUB_WORKSPACE
 
-      - name: Checkout
-        run: |
-          cd $GITHUB_WORKSPACE
-          git init
-          git remote add origin https://github.com/$GITHUB_REPOSITORY
-          git fetch
-          git checkout -t origin/$CURRENT_BRANCH
+#       - name: Checkout
+#         run: |
+#           cd $GITHUB_WORKSPACE
+#           git init
+#           git remote add origin https://github.com/$GITHUB_REPOSITORY
+#           git fetch
+#           git checkout -t origin/$CURRENT_BRANCH
 
       - name: Download Toolchain Image Form Artifacts
         if: env.TOOLCHAIN_RELEASE_UPLOAD != 'true'
