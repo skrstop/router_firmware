@@ -208,7 +208,7 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          cd workspace
+          cd $GITHUB_WORKSPACE
           rm -rf *
           sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
           sudo -E apt-get -qq update
