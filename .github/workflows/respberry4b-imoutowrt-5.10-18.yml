@@ -483,7 +483,7 @@ jobs:
         uses: ncipollo/release-action@v1.8.0
         if: env.FIRMWARE_RELEASE_UPLOAD == 'true'
         with:
-          name: openwrt-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
+          name: respberry4b-imoutowrt-5.10-18.06
           allowUpdates: true
           replacesArtifacts: true
           tag: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
