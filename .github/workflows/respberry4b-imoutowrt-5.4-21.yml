@@ -10,8 +10,8 @@ name: Respberry4B imoutowrt 5.4 21.02
 
 on:
   workflow_dispatch:
-#  schedule:
-#    - cron: 0 18 * * *
+  schedule:
+   - cron: '0 18 * * *'
   # watch:
   #   types: started
 
