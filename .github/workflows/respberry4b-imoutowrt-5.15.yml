@@ -30,8 +30,8 @@ env:
 
 jobs:
   Toolchain:
-    #runs-on: ubuntu-20.04
-    runs-on: self-hosted
+    runs-on: ubuntu-20.04
+    #runs-on: self-hosted
 
     outputs:
       OPENWRT_ROOT_PATH: ${{ steps.clone.outputs.OPENWRT_ROOT_PATH }}
@@ -189,8 +189,8 @@ jobs:
 
   Build:
     needs: [ Toolchain ]
-    #runs-on: ubuntu-20.04
-    runs-on: self-hosted
+    runs-on: ubuntu-20.04
+    #runs-on: self-hosted
 
     steps:
       - name: Restore Variables
@@ -395,8 +395,8 @@ jobs:
 
   Upload:
     needs: [ Build, Toolchain ]
-    #runs-on: ubuntu-20.04
-    runs-on: self-hosted
+    runs-on: ubuntu-20.04
+    #runs-on: self-hosted
 
     steps:
       - name: Checkout
