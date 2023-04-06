@@ -434,7 +434,7 @@ jobs:
 
       - name: Organize Files
         run: |
-          export BUILD_DATE=$(date +"%Y-%m-%d")
+          export BUILD_DATE=$(date +"%Y.%m.%d-%H%M")
           echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
           cd $OPENWRT_ROOT_PATH/bin/targets/$DEVICE_TARGET/$DEVICE_SUBTARGET
           rm -rf packages
@@ -483,7 +483,7 @@ jobs:
         uses: ncipollo/release-action@v1.8.0
         if: env.FIRMWARE_RELEASE_UPLOAD == 'true'
         with:
-          name: respberry4b-imoutowrt-5.15-21.02
+          name: respberry4b-imoutowrt-5.15-21.02-${{ env.BUILD_DATE }}
           allowUpdates: true
           replacesArtifacts: true
           tag: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
