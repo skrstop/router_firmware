@@ -486,7 +486,7 @@ jobs:
           name: respberry4b-imoutowrt-5.4-18.06-${{ env.BUILD_DATE }}
           allowUpdates: true
           replacesArtifacts: true
-          tag: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
+          tag: respberry4b-imoutowrt-5.15-21.02-${{ env.BUILD_DATE }}
           body: ${{ env.BUILD_DATE }}
           commit: ${{ env.CURRENT_BRANCH }}
           token: ${{ secrets.GITHUB_TOKEN }}
