@@ -68,7 +68,7 @@ jobs:
         [ -e $GITHUB_WORKSPACE/$CONFIG_FILE ] && echo "TARGET_DEVICE=$(grep '^CONFIG_TARGET.*DEVICE.*=y' $GITHUB_WORKSPACE/$CONFIG_FILE | sed -r 's/.*DEVICE_(.*)=y/\1/')" >> $GITHUB_ENV
 
     - name: Cache
-      uses: klever1988/cachewrtbuild@test
+      uses: klever1988/cachewrtbuild@main
       with:
         ccache: 'true'
         prefix: ${{ github.workspace }}/openwrt
@@ -189,7 +189,7 @@ jobs:
         files: ${{ env.FIRMWARE }}/*
 
     - name: Delete workflow runs
-      uses: GitRML/delete-workflow-runs@main
+      uses: Mattraks/delete-workflow-runs@v2
       with:
         retain_days: 1
         keep_minimum_runs: 3

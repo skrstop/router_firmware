@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Delete Workflow Runs
         id: workflow
-        uses: GitRML/delete-workflow-runs@main
+        uses: Mattraks/delete-workflow-runs@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           retain_days: 7
