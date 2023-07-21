@@ -44,6 +44,10 @@ jobs:
       TOOLCHAIN_IMAGE: ${{ steps.env.outputs.TOOLCHAIN_IMAGE }}
 
     steps:
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Initialization Environment
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -245,6 +249,10 @@ jobs:
     #runs-on: self-hosted
 
     steps:
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Restore Variables
         run: |
           echo "CURRENT_BRANCH=$(echo '${{needs.Toolchain.outputs.CURRENT_BRANCH}}')" >> $GITHUB_ENV
@@ -515,6 +523,10 @@ jobs:
     #runs-on: self-hosted
 
     steps:
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Checkout
         uses: actions/checkout@main
 

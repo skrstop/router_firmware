@@ -44,6 +44,10 @@ jobs:
       TOOLCHAIN_IMAGE: ${{ steps.env.outputs.TOOLCHAIN_IMAGE }}
 
     steps:
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Initialization Environment
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -519,6 +523,10 @@ jobs:
     #runs-on: self-hosted
 
     steps:
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Checkout
         uses: actions/checkout@main
 
