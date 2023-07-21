@@ -6,7 +6,7 @@
 # Blog: https://p3terx.com
 #=================================================
 
-name: Respberry4B imoutowrt 5.15 21.02
+name: Respberry4B imoutowrt 22.03
 
 on:
   workflow_dispatch:
