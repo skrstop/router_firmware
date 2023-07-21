@@ -253,3 +253,4 @@ hs_err_pid*
 
 PrePayRequestRO.java
 /user-center-client/user-center-starter-client-auth/src/main/resources/rebel.xml
+!/.fastRequest/
