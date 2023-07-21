@@ -8,6 +8,8 @@ log/
 .flattened-pom.xml
 rebel.xml
 **/rebel.xml
+.fastRequest
+.fastRequest/**
 
 ### Windows template
 # Windows thumbnail cache files
@@ -253,4 +255,5 @@ hs_err_pid*
 
 PrePayRequestRO.java
 /user-center-client/user-center-starter-client-auth/src/main/resources/rebel.xml
+!/.fastRequest/
 !/.fastRequest/
