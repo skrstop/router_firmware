@@ -131,12 +131,20 @@ jobs:
           ./scripts/feeds install -a
           make defconfig
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Compile Tools
         if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
         run: |
           cd $OPENWRT_ROOT_PATH
           echo -e "$(nproc) thread compile"
           make tools/compile -j$(nproc) || make tools/compile -j1 V=s
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Compile Toolchain
         if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
@@ -145,6 +153,10 @@ jobs:
           echo -e "$(nproc) thread compile"
           make toolchain/compile -j$(nproc) || make toolchain/compile -j1 V=s
           rm -rf .config* dl bin
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Generate Toolchain Image
         if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
@@ -158,12 +170,20 @@ jobs:
           echo $CURRENT_HASH > $GITHUB_WORKSPACE/output/toolchain-$SOURCE_OWNER-$SOURCE_REPO-$SOURCE_BRANCH-$DEVICE_TARGET-$DEVICE_SUBTARGET.hash
           ls -lh $GITHUB_WORKSPACE/output
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Upload Toolchain Image To Artifact
         if: env.TOOLCHAIN_RELEASE_UPLOAD != 'true' && steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
         uses: actions/upload-artifact@main
         with:
           name: ${{ env.TOOLCHAIN_IMAGE }}
           path: output
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Delete Old Toolchain Assets From Release
         if: env.TOOLCHAIN_RELEASE_UPLOAD == 'true' && steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
@@ -174,6 +194,10 @@ jobs:
           assets: "toolchain-${{ env.TOOLCHAIN_IMAGE }}.*"
           fail-if-no-assets: false
           fail-if-no-release: false
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Upload Toolchain Image To Release
         if: env.TOOLCHAIN_RELEASE_UPLOAD == 'true' && steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
@@ -187,12 +211,20 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: output/*
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
   Build:
     needs: [ Toolchain ]
     runs-on: ubuntu-20.04
     #runs-on: self-hosted
 
     steps:
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Restore Variables
         run: |
           echo "CURRENT_BRANCH=$(echo '${{needs.Toolchain.outputs.CURRENT_BRANCH}}')" >> $GITHUB_ENV
@@ -254,12 +286,20 @@ jobs:
           git fetch
           git checkout -t origin/$CURRENT_BRANCH
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Download Toolchain Image Form Artifacts
         if: env.TOOLCHAIN_RELEASE_UPLOAD != 'true'
         uses: actions/download-artifact@v2
         with:
           name: ${{ env.TOOLCHAIN_IMAGE }}
           path: workspace
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Prepare Toolchain Image Form Artifacts
         if: env.TOOLCHAIN_RELEASE_UPLOAD != 'true'
@@ -319,6 +359,10 @@ jobs:
           $GITHUB_WORKSPACE/respberry4b/scripts/preset-terminal-tools.sh
           make defconfig
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Download DL Package
         id: download
         run: |
@@ -335,6 +379,10 @@ jobs:
           yes n | make target/compile -j1 V=s IGNORE_ERRORS=1
           make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j1 V=s IGNORE_ERRORS=1
           make package/index
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Generate Firmware
         id: generate
@@ -368,6 +416,10 @@ jobs:
           make json_overview_image_info
           make checksum
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Print Sha256sums
         run: |
           cd $OPENWRT_ROOT_PATH/bin/targets/$DEVICE_TARGET/$DEVICE_SUBTARGET
@@ -393,6 +445,10 @@ jobs:
           name: bin-archive
           path: ${{ env.OPENWRT_ROOT_PATH }}/${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}.zip
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
   Upload:
     needs: [ Build, Toolchain ]
     runs-on: ubuntu-20.04
@@ -413,6 +469,10 @@ jobs:
           echo "DEVICE_SUBTARGET=$(echo '${{needs.Toolchain.outputs.DEVICE_SUBTARGET}}')" >> $GITHUB_ENV
           echo "TOOLCHAIN_IMAGE=$(echo '${{needs.Toolchain.outputs.TOOLCHAIN_IMAGE}}')" >> $GITHUB_ENV
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Initialization Environment
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -426,6 +486,10 @@ jobs:
         with:
           name: bin-archive
           path: ${{ env.OPENWRT_ROOT_PATH }}
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Decompress Bin Archive
         run: |
@@ -469,6 +533,10 @@ jobs:
           b2 authorize-account $B2_APPLICATION_KEY_ID $B2_APPLICATION_KEY
           b2 sync --noProgress --threads 32 --keepDays 7 --replaceNewer $SOURCE_TARGETS $DEST_TARGETS
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Delete Old Firmware Assets
         if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
         uses: mknejp/delete-release-assets@v1
@@ -478,6 +546,10 @@ jobs:
           fail-if-no-assets: false
           fail-if-no-release: false
           assets: "*"
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Deploy Files To Release
         uses: ncipollo/release-action@v1.8.0
@@ -491,3 +563,7 @@ jobs:
           commit: ${{ env.CURRENT_BRANCH }}
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}/*
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
