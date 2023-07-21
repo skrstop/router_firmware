@@ -547,10 +547,10 @@ jobs:
         uses: ncipollo/release-action@v1.8.0
         if: env.FIRMWARE_RELEASE_UPLOAD == 'true'
         with:
-          name: respberry4b-imoutowrt-5.15-21.02-${{ env.BUILD_DATE }}
+          name: respberry4b-imoutowrt-5.15-23.05-${{ env.BUILD_DATE }}
           allowUpdates: true
           replacesArtifacts: true
-          tag: respberry4b-imoutowrt-5.15-21.02-${{ env.BUILD_DATE }}
+          tag: respberry4b-imoutowrt-5.15-23.05-${{ env.BUILD_DATE }}
           body: ${{ env.BUILD_DATE }}
           commit: ${{ env.CURRENT_BRANCH }}
           token: ${{ secrets.GITHUB_TOKEN }}

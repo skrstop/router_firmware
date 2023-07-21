@@ -347,7 +347,7 @@ jobs:
           cat respberry4b/general-packages.config >> $OPENWRT_ROOT_PATH/.config
           cat respberry4b/extra-drivers.config >> $OPENWRT_ROOT_PATH/.config
           cd $OPENWRT_ROOT_PATH
-          echo -e "CONFIG_USB_LAN78XX=y\nCONFIG_USB_NET_DRIVERS=y" >> target/linux/bcm27xx/bcm2711/config-5.15
+          echo -e "CONFIG_USB_LAN78XX=y\nCONFIG_USB_NET_DRIVERS=y" >> target/linux/bcm27xx/bcm2711/config-6.1
           sed -i 's/36/44/g;s/VHT80/VHT20/g' package/kernel/mac80211/files/lib/wifi/mac80211.sh
           chmod +x $GITHUB_WORKSPACE/respberry4b/scripts/*.sh
           $GITHUB_WORKSPACE/$DIY_SH
@@ -551,10 +551,10 @@ jobs:
         uses: ncipollo/release-action@v1.8.0
         if: env.FIRMWARE_RELEASE_UPLOAD == 'true'
         with:
-          name: respberry4b-imoutowrt-5.15-21.02-${{ env.BUILD_DATE }}
+          name: respberry4b-imoutowrt-6.1-22.03-${{ env.BUILD_DATE }}
           allowUpdates: true
           replacesArtifacts: true
-          tag: respberry4b-imoutowrt-5.15-21.02-${{ env.BUILD_DATE }}
+          tag: respberry4b-imoutowrt-6.1-22.03-${{ env.BUILD_DATE }}
           body: ${{ env.BUILD_DATE }}
           commit: ${{ env.CURRENT_BRANCH }}
           token: ${{ secrets.GITHUB_TOKEN }}
