@@ -48,6 +48,17 @@ jobs:
         if: (!cancelled())
         run: df -hT
 
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: 'true'
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Initialization Environment
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -249,6 +260,17 @@ jobs:
     #runs-on: self-hosted
 
     steps:
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: 'true'
+
       - name: Check space usage
         if: (!cancelled())
         run: df -hT
@@ -523,6 +545,17 @@ jobs:
     #runs-on: self-hosted
 
     steps:
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: 'true'
+
       - name: Check space usage
         if: (!cancelled())
         run: df -hT
