@@ -56,8 +56,16 @@ jobs:
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
           mkdir -p workspace
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Checkout
         uses: actions/checkout@main
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Clone Source Code
         id: clone
@@ -68,6 +76,10 @@ jobs:
           echo "OPENWRT_ROOT_PATH=$PWD" >> $GITHUB_ENV
           echo "OPENWRT_ROOT_PATH=$(echo $PWD)" >> $GITHUB_OUTPUT
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Generate Toolchain Config
         run: |
           [ -e $CONFIG_FILE ] && mv $CONFIG_FILE $OPENWRT_ROOT_PATH/.config
@@ -75,6 +87,10 @@ jobs:
           echo -e "\nCONFIG_ALL_NONSHARED=y" >> $OPENWRT_ROOT_PATH/.config
           cd $OPENWRT_ROOT_PATH
           make defconfig > /dev/null 2>&1
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Generate Variables
         id: env
@@ -102,6 +118,10 @@ jobs:
           echo "TOOLCHAIN_IMAGE=$TOOLCHAIN_IMAGE" >> $GITHUB_ENV
           echo "TOOLCHAIN_IMAGE=$(echo $TOOLCHAIN_IMAGE)" >> $GITHUB_OUTPUT
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Compare Toolchain Hash
         id: hash
         run: |
@@ -115,6 +135,10 @@ jobs:
           if [ -z "$CACHE_HASH" ] || [ "$CURRENT_HASH" != "$CACHE_HASH" ]; then
             echo "REBUILD_TOOLCHAIN=true" >> $GITHUB_OUTPUT
           fi
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
 #      - name: Load custom feeds
 #        run: |
@@ -236,6 +260,10 @@ jobs:
           echo "DEVICE_SUBTARGET=$(echo '${{needs.Toolchain.outputs.DEVICE_SUBTARGET}}')" >> $GITHUB_ENV
           echo "TOOLCHAIN_IMAGE=$(echo '${{needs.Toolchain.outputs.TOOLCHAIN_IMAGE}}')" >> $GITHUB_ENV
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Initialization Environment
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -248,6 +276,10 @@ jobs:
           sudo -E apt-get -qq autoremove --purge
           sudo -E apt-get -qq clean
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Combine Disks
         run: |
@@ -277,6 +309,10 @@ jobs:
           sudo mount -B $GITHUB_WORKSPACE/tmp /tmp
           df -hT $GITHUB_WORKSPACE
           sudo btrfs filesystem usage $GITHUB_WORKSPACE
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Checkout
         run: |
@@ -316,6 +352,10 @@ jobs:
           cd $OPENWRT_ROOT_PATH
           git pull
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Prepare Toolchain Image Form Releases
         if: env.TOOLCHAIN_RELEASE_UPLOAD == 'true'
         run: |
@@ -331,6 +371,10 @@ jobs:
           cd $OPENWRT_ROOT_PATH
           git pull
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
 #      - name: Load custom feeds
 #        run: |
 #          [ -e $FEEDS_CONF ] && mv $FEEDS_CONF cd $OPENWRT_ROOT_PATH/feeds.conf.default
@@ -343,6 +387,10 @@ jobs:
           cd $OPENWRT_ROOT_PATH
           ./scripts/feeds update -a
           ./scripts/feeds install -a
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Load Custom Configuration
         run: |
@@ -368,6 +416,10 @@ jobs:
         run: |
           cd $OPENWRT_ROOT_PATH
           make download -j64
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Compile Packages
         run: |
@@ -425,10 +477,18 @@ jobs:
           cd $OPENWRT_ROOT_PATH/bin/targets/$DEVICE_TARGET/$DEVICE_SUBTARGET
           cat sha256sums
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Compress Bin Folder
         run: |
           cd $OPENWRT_ROOT_PATH
           zip -r $DEVICE_TARGET-$DEVICE_SUBTARGET.zip bin
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Print Disk Usage
         if: always()
@@ -438,6 +498,10 @@ jobs:
           echo '-----'
           echo 'df -h'
           df -h
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Upload Bin Archive
         uses: actions/upload-artifact@main
@@ -481,6 +545,10 @@ jobs:
           sudo -E apt-get -qq install zip unzip rsync
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Download Bin Archive
         uses: actions/download-artifact@v2
         with:
@@ -496,6 +564,10 @@ jobs:
           cd $OPENWRT_ROOT_PATH
           unzip $DEVICE_TARGET-$DEVICE_SUBTARGET.zip
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Organize Files
         run: |
           export BUILD_DATE=$(date +"%Y.%m.%d-%H%M")
@@ -503,6 +575,10 @@ jobs:
           cd $OPENWRT_ROOT_PATH/bin/targets/$DEVICE_TARGET/$DEVICE_SUBTARGET
           rm -rf packages
           df -hT $PWD
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Deploy Files To HostHatch Node
         env:
@@ -519,6 +595,10 @@ jobs:
           ssh -q -t -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $HOST \
           bash -c "'mkdir -p $WEB_ROOT_PATH/releases/targets/$DEVICE_TARGET/$DEVICE_SUBTARGET'"
           rsync -chavP --delete -e 'ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no' $SOURCE_TARGETS $HOST:$DEST_TARGETS
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Deploy Files To Backblaze
         env:

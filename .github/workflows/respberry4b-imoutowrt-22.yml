@@ -80,6 +80,10 @@ jobs:
           cd $OPENWRT_ROOT_PATH
           make defconfig > /dev/null 2>&1
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Generate Variables
         id: env
         run: |
@@ -105,6 +109,10 @@ jobs:
           export TOOLCHAIN_IMAGE="toolchain-$SOURCE_OWNER-$SOURCE_REPO-$SOURCE_BRANCH-$DEVICE_TARGET-$DEVICE_SUBTARGET"
           echo "TOOLCHAIN_IMAGE=$TOOLCHAIN_IMAGE" >> $GITHUB_ENV
           echo "TOOLCHAIN_IMAGE=$(echo $TOOLCHAIN_IMAGE)" >> $GITHUB_OUTPUT
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Compare Toolchain Hash
         id: hash
@@ -139,12 +147,20 @@ jobs:
           ./scripts/feeds install -a
           make defconfig
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Compile Tools
         if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
         run: |
           cd $OPENWRT_ROOT_PATH
           echo -e "$(nproc) thread compile"
           make tools/compile -j$(nproc) || make tools/compile -j1 V=s
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Compile Toolchain
         if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
@@ -180,6 +196,10 @@ jobs:
         with:
           name: ${{ env.TOOLCHAIN_IMAGE }}
           path: output
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Delete Old Toolchain Assets From Release
         if: env.TOOLCHAIN_RELEASE_UPLOAD == 'true' && steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
@@ -228,6 +248,10 @@ jobs:
           echo "DEVICE_SUBTARGET=$(echo '${{needs.Toolchain.outputs.DEVICE_SUBTARGET}}')" >> $GITHUB_ENV
           echo "TOOLCHAIN_IMAGE=$(echo '${{needs.Toolchain.outputs.TOOLCHAIN_IMAGE}}')" >> $GITHUB_ENV
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Initialization Environment
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -240,6 +264,10 @@ jobs:
           sudo -E apt-get -qq autoremove --purge
           sudo -E apt-get -qq clean
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Combine Disks
         run: |
@@ -269,6 +297,10 @@ jobs:
           sudo mount -B $GITHUB_WORKSPACE/tmp /tmp
           df -hT $GITHUB_WORKSPACE
           sudo btrfs filesystem usage $GITHUB_WORKSPACE
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Checkout
         run: |
@@ -308,6 +340,10 @@ jobs:
           cd $OPENWRT_ROOT_PATH
           git pull
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Prepare Toolchain Image Form Releases
         if: env.TOOLCHAIN_RELEASE_UPLOAD == 'true'
         run: |
@@ -340,6 +376,10 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Load Custom Configuration
         run: |
           [ -e files ] && mv files $OPENWRT_ROOT_PATH/files
@@ -354,6 +394,10 @@ jobs:
           $GITHUB_WORKSPACE/respberry4b/scripts/preset-clash-core.sh $CLASH_BINARY_PLATFORM
           $GITHUB_WORKSPACE/respberry4b/scripts/preset-terminal-tools.sh
           make defconfig
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Download DL Package
         id: download
@@ -421,10 +465,18 @@ jobs:
           cd $OPENWRT_ROOT_PATH/bin/targets/$DEVICE_TARGET/$DEVICE_SUBTARGET
           cat sha256sums
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Compress Bin Folder
         run: |
           cd $OPENWRT_ROOT_PATH
           zip -r $DEVICE_TARGET-$DEVICE_SUBTARGET.zip bin
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Print Disk Usage
         if: always()
@@ -435,11 +487,19 @@ jobs:
           echo 'df -h'
           df -h
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Upload Bin Archive
         uses: actions/upload-artifact@main
         with:
           name: bin-archive
           path: ${{ env.OPENWRT_ROOT_PATH }}/${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}.zip
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
   Upload:
     needs: [ Build, Toolchain ]
@@ -449,6 +509,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@main
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Restore Variables
         run: |
@@ -460,6 +524,10 @@ jobs:
           echo "DEVICE_TARGET=$(echo '${{needs.Toolchain.outputs.DEVICE_TARGET}}')" >> $GITHUB_ENV
           echo "DEVICE_SUBTARGET=$(echo '${{needs.Toolchain.outputs.DEVICE_SUBTARGET}}')" >> $GITHUB_ENV
           echo "TOOLCHAIN_IMAGE=$(echo '${{needs.Toolchain.outputs.TOOLCHAIN_IMAGE}}')" >> $GITHUB_ENV
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Initialization Environment
         env:
@@ -488,6 +556,10 @@ jobs:
           cd $OPENWRT_ROOT_PATH
           unzip $DEVICE_TARGET-$DEVICE_SUBTARGET.zip
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Organize Files
         run: |
           export BUILD_DATE=$(date +"%Y.%m.%d-%H%M")
@@ -515,6 +587,10 @@ jobs:
           ssh -q -t -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $HOST \
           bash -c "'mkdir -p $WEB_ROOT_PATH/releases/targets/$DEVICE_TARGET/$DEVICE_SUBTARGET'"
           rsync -chavP --delete -e 'ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no' $SOURCE_TARGETS $HOST:$DEST_TARGETS
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Deploy Files To Backblaze
         env:
@@ -559,3 +635,7 @@ jobs:
           commit: ${{ env.CURRENT_BRANCH }}
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}/*
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
