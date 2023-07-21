@@ -68,6 +68,10 @@ jobs:
           echo "OPENWRT_ROOT_PATH=$PWD" >> $GITHUB_ENV
           echo "OPENWRT_ROOT_PATH=$(echo $PWD)" >> $GITHUB_OUTPUT
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Generate Toolchain Config
         run: |
           [ -e $CONFIG_FILE ] && mv $CONFIG_FILE $OPENWRT_ROOT_PATH/.config
@@ -116,6 +120,10 @@ jobs:
             echo "REBUILD_TOOLCHAIN=true" >> $GITHUB_OUTPUT
           fi
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
 #      - name: Load custom feeds
 #        run: |
 #          [ -e $FEEDS_CONF ] && mv $FEEDS_CONF cd $OPENWRT_ROOT_PATH/feeds.conf.default
@@ -158,6 +166,10 @@ jobs:
           echo $CURRENT_HASH > $GITHUB_WORKSPACE/output/toolchain-$SOURCE_OWNER-$SOURCE_REPO-$SOURCE_BRANCH-$DEVICE_TARGET-$DEVICE_SUBTARGET.hash
           ls -lh $GITHUB_WORKSPACE/output
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Upload Toolchain Image To Artifact
         if: env.TOOLCHAIN_RELEASE_UPLOAD != 'true' && steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
         uses: actions/upload-artifact@main
@@ -175,6 +187,10 @@ jobs:
           fail-if-no-assets: false
           fail-if-no-release: false
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Upload Toolchain Image To Release
         if: env.TOOLCHAIN_RELEASE_UPLOAD == 'true' && steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
         uses: ncipollo/release-action@v1.8.0
@@ -186,6 +202,10 @@ jobs:
           commit: ${{ env.CURRENT_BRANCH }}
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: output/*
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
   Build:
     needs: [ Toolchain ]
@@ -216,6 +236,10 @@ jobs:
           sudo -E apt-get -qq autoremove --purge
           sudo -E apt-get -qq clean
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Combine Disks
         run: |
@@ -254,6 +278,10 @@ jobs:
           git fetch
           git checkout -t origin/$CURRENT_BRANCH
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Download Toolchain Image Form Artifacts
         if: env.TOOLCHAIN_RELEASE_UPLOAD != 'true'
         uses: actions/download-artifact@v2
@@ -275,6 +303,10 @@ jobs:
           sudo mount -t overlay overlay -o lowerdir=openwrt-ro,upperdir=overlay,workdir=workdir openwrt
           cd $OPENWRT_ROOT_PATH
           git pull
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Prepare Toolchain Image Form Releases
         if: env.TOOLCHAIN_RELEASE_UPLOAD == 'true'
@@ -319,11 +351,19 @@ jobs:
           $GITHUB_WORKSPACE/respberry4b/scripts/preset-terminal-tools.sh
           make defconfig
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Download DL Package
         id: download
         run: |
           cd $OPENWRT_ROOT_PATH
           make download -j64
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Compile Packages
         run: |
@@ -335,6 +375,10 @@ jobs:
           yes n | make target/compile -j1 V=s IGNORE_ERRORS=1
           make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j1 V=s IGNORE_ERRORS=1
           make package/index
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Generate Firmware
         id: generate
@@ -368,6 +412,10 @@ jobs:
           make json_overview_image_info
           make checksum
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Print Sha256sums
         run: |
           cd $OPENWRT_ROOT_PATH/bin/targets/$DEVICE_TARGET/$DEVICE_SUBTARGET
@@ -392,6 +440,10 @@ jobs:
         with:
           name: bin-archive
           path: ${{ env.OPENWRT_ROOT_PATH }}/${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}.zip
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
   Upload:
     needs: [ Build, Toolchain ]
@@ -421,6 +473,10 @@ jobs:
           sudo -E apt-get -qq install zip unzip rsync
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Download Bin Archive
         uses: actions/download-artifact@v2
         with:
@@ -439,6 +495,10 @@ jobs:
           cd $OPENWRT_ROOT_PATH/bin/targets/$DEVICE_TARGET/$DEVICE_SUBTARGET
           rm -rf packages
           df -hT $PWD
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Deploy Files To HostHatch Node
         env:
@@ -478,6 +538,10 @@ jobs:
           fail-if-no-assets: false
           fail-if-no-release: false
           assets: "*"
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Deploy Files To Release
         uses: ncipollo/release-action@v1.8.0

@@ -68,6 +68,10 @@ jobs:
           echo "OPENWRT_ROOT_PATH=$PWD" >> $GITHUB_ENV
           echo "OPENWRT_ROOT_PATH=$(echo $PWD)" >> $GITHUB_OUTPUT
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Generate Toolchain Config
         run: |
           [ -e $CONFIG_FILE ] && mv $CONFIG_FILE $OPENWRT_ROOT_PATH/.config
@@ -116,6 +120,10 @@ jobs:
             echo "REBUILD_TOOLCHAIN=true" >> $GITHUB_OUTPUT
           fi
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
 #      - name: Load custom feeds
 #        run: |
 #          [ -e $FEEDS_CONF ] && mv $FEEDS_CONF cd $OPENWRT_ROOT_PATH/feeds.conf.default
@@ -146,6 +154,10 @@ jobs:
           make toolchain/compile -j$(nproc) || make toolchain/compile -j1 V=s
           rm -rf .config* dl bin
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Generate Toolchain Image
         if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
         run: |
@@ -157,6 +169,10 @@ jobs:
           cd $OPENWRT_ROOT_PATH
           echo $CURRENT_HASH > $GITHUB_WORKSPACE/output/toolchain-$SOURCE_OWNER-$SOURCE_REPO-$SOURCE_BRANCH-$DEVICE_TARGET-$DEVICE_SUBTARGET.hash
           ls -lh $GITHUB_WORKSPACE/output
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Upload Toolchain Image To Artifact
         if: env.TOOLCHAIN_RELEASE_UPLOAD != 'true' && steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
@@ -175,6 +191,10 @@ jobs:
           fail-if-no-assets: false
           fail-if-no-release: false
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Upload Toolchain Image To Release
         if: env.TOOLCHAIN_RELEASE_UPLOAD == 'true' && steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
         uses: ncipollo/release-action@v1.8.0
@@ -186,6 +206,10 @@ jobs:
           commit: ${{ env.CURRENT_BRANCH }}
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: output/*
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
   Build:
     needs: [ Toolchain ]
@@ -254,12 +278,20 @@ jobs:
           git fetch
           git checkout -t origin/$CURRENT_BRANCH
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Download Toolchain Image Form Artifacts
         if: env.TOOLCHAIN_RELEASE_UPLOAD != 'true'
         uses: actions/download-artifact@v2
         with:
           name: ${{ env.TOOLCHAIN_IMAGE }}
           path: workspace
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Prepare Toolchain Image Form Artifacts
         if: env.TOOLCHAIN_RELEASE_UPLOAD != 'true'
@@ -290,6 +322,10 @@ jobs:
           sudo mount -t overlay overlay -o lowerdir=openwrt-ro,upperdir=overlay,workdir=workdir openwrt
           cd $OPENWRT_ROOT_PATH
           git pull
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
 #      - name: Load custom feeds
 #        run: |
@@ -325,6 +361,10 @@ jobs:
           cd $OPENWRT_ROOT_PATH
           make download -j64
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Compile Packages
         run: |
           cd $OPENWRT_ROOT_PATH
@@ -335,6 +375,10 @@ jobs:
           yes n | make target/compile -j1 V=s IGNORE_ERRORS=1
           make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j1 V=s IGNORE_ERRORS=1
           make package/index
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Generate Firmware
         id: generate
@@ -367,6 +411,10 @@ jobs:
           make target/install -j$(nproc) || make target/install -j1 V=s
           make json_overview_image_info
           make checksum
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Print Sha256sums
         run: |
@@ -421,11 +469,19 @@ jobs:
           sudo -E apt-get -qq install zip unzip rsync
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Download Bin Archive
         uses: actions/download-artifact@v2
         with:
           name: bin-archive
           path: ${{ env.OPENWRT_ROOT_PATH }}
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Decompress Bin Archive
         run: |
@@ -439,6 +495,10 @@ jobs:
           cd $OPENWRT_ROOT_PATH/bin/targets/$DEVICE_TARGET/$DEVICE_SUBTARGET
           rm -rf packages
           df -hT $PWD
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Deploy Files To HostHatch Node
         env:
@@ -469,6 +529,10 @@ jobs:
           b2 authorize-account $B2_APPLICATION_KEY_ID $B2_APPLICATION_KEY
           b2 sync --noProgress --threads 32 --keepDays 7 --replaceNewer $SOURCE_TARGETS $DEST_TARGETS
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Delete Old Firmware Assets
         if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
         uses: mknejp/delete-release-assets@v1
@@ -478,6 +542,10 @@ jobs:
           fail-if-no-assets: false
           fail-if-no-release: false
           assets: "*"
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Deploy Files To Release
         uses: ncipollo/release-action@v1.8.0
