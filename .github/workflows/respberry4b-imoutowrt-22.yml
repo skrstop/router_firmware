@@ -60,8 +60,16 @@ jobs:
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
           mkdir -p workspace
 
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
+
       - name: Checkout
         uses: actions/checkout@main
+
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Clone Source Code
         id: clone
