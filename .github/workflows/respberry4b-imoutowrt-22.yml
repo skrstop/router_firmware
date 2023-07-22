@@ -272,6 +272,11 @@ jobs:
     runs-on: ubuntu-20.04-self
 
     steps:    
+      - name: Umount
+        run: |
+          sudo umount /dev/loop0
+          sudo umount overlay
+          
       - name: Clean Up
         run: |
           ls -alh
