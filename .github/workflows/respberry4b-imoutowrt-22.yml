@@ -45,6 +45,7 @@ jobs:
 
     steps:       
       - name: Umount
+        continue-on-error: true
         run: |
           sudo umount /dev/loop0
           sudo umount overlay
