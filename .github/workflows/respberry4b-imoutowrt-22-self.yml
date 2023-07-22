@@ -154,31 +154,6 @@ jobs:
         if: (!cancelled())
         run: df -hT
 
-      - name: Compare Toolchain Hash
-        id: hash
-        run: |
-          cd $OPENWRT_ROOT_PATH
-          export CURRENT_HASH=$(git log --pretty=tformat:"%H" -n1 tools toolchain)
-          echo "CURRENT_HASH=$CURRENT_HASH" >> $GITHUB_ENV
-          echo "CURRENT_HASH=$(echo $CURRENT_HASH)" >> $GITHUB_OUTPUT
-          echo "CURRENT_HASH is $CURRENT_HASH"
-          export CACHE_HASH=$(curl -fSsL https://github.com/$GITHUB_REPOSITORY/releases/download/$TOOLCHAIN_TAG/$TOOLCHAIN_IMAGE.hash)
-          echo "CACHE_HASH is $CACHE_HASH"
-          if [ -z "$CACHE_HASH" ] || [ "$CURRENT_HASH" != "$CACHE_HASH" ]; then
-            echo "REBUILD_TOOLCHAIN=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
-#      - name: Load custom feeds
-#        run: |
-#          [ -e $FEEDS_CONF ] && mv $FEEDS_CONF cd $OPENWRT_ROOT_PATH/feeds.conf.default
-#          chmod +x $GITHUB_WORKSPACE/respberry4b/scripts/feeds-add.sh
-#          cd $OPENWRT_ROOT_PATH
-#          $GITHUB_WORKSPACE/respberry4b/scripts/feeds-add.sh
-
       - name: Install Feeds
         if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
         run: |
@@ -192,7 +167,6 @@ jobs:
         run: df -hT
 
       - name: Compile Tools
-        if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
         run: |
           cd $OPENWRT_ROOT_PATH
           echo -e "$(nproc) thread compile"
@@ -203,28 +177,11 @@ jobs:
         run: df -hT
 
       - name: Compile Toolchain
-        if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
         run: |
           cd $OPENWRT_ROOT_PATH
           echo -e "$(nproc) thread compile"
           make toolchain/compile -j$(nproc) || make toolchain/compile -j1 V=s
           rm -rf .config* dl bin
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
-      - name: Generate Toolchain Image
-        if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
-        run: |
-          cd workspace
-          mksquashfs openwrt $TOOLCHAIN_IMAGE -force-gid 1001 -force-uid 1001 -comp zstd
-          mkdir -p $GITHUB_WORKSPACE/output
-          split -d -b 1900M $TOOLCHAIN_IMAGE $GITHUB_WORKSPACE/output/$TOOLCHAIN_IMAGE.img.
-          rm $TOOLCHAIN_IMAGE
-          cd $OPENWRT_ROOT_PATH
-          echo $CURRENT_HASH > $GITHUB_WORKSPACE/output/toolchain-$SOURCE_OWNER-$SOURCE_REPO-$SOURCE_BRANCH-$DEVICE_TARGET-$DEVICE_SUBTARGET.hash
-          ls -lh $GITHUB_WORKSPACE/output
 
       - name: Check space usage
         if: (!cancelled())
