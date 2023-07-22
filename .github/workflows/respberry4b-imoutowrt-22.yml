@@ -31,7 +31,7 @@ env:
 jobs:
   Toolchain:
 #     runs-on: ubuntu-20.04
-    runs-on: ubuntu-20.04-8core
+    runs-on: ubuntu-20.04-self
 
     outputs:
       OPENWRT_ROOT_PATH: ${{ steps.clone.outputs.OPENWRT_ROOT_PATH }}
@@ -264,7 +264,7 @@ jobs:
   Build:
     needs: [ Toolchain ]
 #     runs-on: ubuntu-20.04
-    runs-on: ubuntu-20.04-8core
+    runs-on: ubuntu-20.04-self
 
     steps:
       - name: Check space usage
@@ -553,7 +553,7 @@ jobs:
   Upload:
     needs: [ Build, Toolchain ]
 #     runs-on: ubuntu-20.04
-    runs-on: ubuntu-20.04-8core
+    runs-on: ubuntu-20.04-self
 
     steps:
       - name: Check space usage
