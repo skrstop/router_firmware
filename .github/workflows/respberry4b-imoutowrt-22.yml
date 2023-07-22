@@ -278,18 +278,19 @@ jobs:
     runs-on: ubuntu-20.04-self
 
     steps:    
-#       - name: Umount
-#         run: |
-#           sudo umount /dev/loop0
-#           sudo umount overlay
+      - name: Umount
+        continue-on-error: true
+        run: |
+          sudo umount /dev/loop0
+          sudo umount overlay
           
-#       - name: Clean Up
-#         run: |
-#           ls -alh
-#           pwd
-#           rm -rf $GITHUB_WORKSPACE/*
-#           rm -rf $GITHUB_WORKSPACE/.g*
-#           ls -alh
+      - name: Clean Up
+        run: |
+          ls -alh
+          pwd
+          rm -rf $GITHUB_WORKSPACE/*
+          rm -rf $GITHUB_WORKSPACE/.g*
+          ls -alh
     
       - name: Check space usage
         if: (!cancelled())
@@ -575,9 +576,10 @@ jobs:
         run: df -hT
         
       - name: Umount
+        continue-on-error: true
         run: |
-          umount /dev/loop0
-          umount overlay
+          sudo umount /dev/loop0
+          sudo umount overlay
 
   Upload:
     needs: [ Build, Toolchain ]
