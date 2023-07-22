@@ -43,7 +43,10 @@ jobs:
       DEVICE_SUBTARGET: ${{ steps.env.outputs.DEVICE_SUBTARGET }}
       TOOLCHAIN_IMAGE: ${{ steps.env.outputs.TOOLCHAIN_IMAGE }}
 
-    steps:
+    steps:    
+      - name: Clean Up
+        run: rm -rf $GITHUB_WORKSPACE/*
+        
       - name: Check space usage
         if: (!cancelled())
         run: df -hT
