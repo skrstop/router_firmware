@@ -43,7 +43,12 @@ jobs:
       DEVICE_SUBTARGET: ${{ steps.env.outputs.DEVICE_SUBTARGET }}
       TOOLCHAIN_IMAGE: ${{ steps.env.outputs.TOOLCHAIN_IMAGE }}
 
-    steps:    
+    steps:       
+      - name: Umount
+        run: |
+          sudo umount /dev/loop0
+          sudo umount overlay
+          
       - name: Clean Up
         run: |
           ls -alh
@@ -272,18 +277,18 @@ jobs:
     runs-on: ubuntu-20.04-self
 
     steps:    
-      - name: Umount
-        run: |
-          sudo umount /dev/loop0
-          sudo umount overlay
+#       - name: Umount
+#         run: |
+#           sudo umount /dev/loop0
+#           sudo umount overlay
           
-      - name: Clean Up
-        run: |
-          ls -alh
-          pwd
-          rm -rf $GITHUB_WORKSPACE/*
-          rm -rf $GITHUB_WORKSPACE/.g*
-          ls -alh
+#       - name: Clean Up
+#         run: |
+#           ls -alh
+#           pwd
+#           rm -rf $GITHUB_WORKSPACE/*
+#           rm -rf $GITHUB_WORKSPACE/.g*
+#           ls -alh
     
       - name: Check space usage
         if: (!cancelled())
@@ -579,13 +584,13 @@ jobs:
     runs-on: ubuntu-20.04-self
 
     steps:   
-      - name: Clean Up
-        run: |
-          ls -alh
-          pwd
-          rm -rf $GITHUB_WORKSPACE/*
-          rm -rf $GITHUB_WORKSPACE/.g*
-          ls -alh
+#       - name: Clean Up
+#         run: |
+#           ls -alh
+#           pwd
+#           rm -rf $GITHUB_WORKSPACE/*
+#           rm -rf $GITHUB_WORKSPACE/.g*
+#           ls -alh
         
       - name: Check space usage
         if: (!cancelled())
