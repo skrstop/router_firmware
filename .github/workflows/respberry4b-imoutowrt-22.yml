@@ -264,6 +264,9 @@ jobs:
     runs-on: ubuntu-20.04-self
 
     steps:    
+      - name: Clean Up
+        run: rm -rf $GITHUB_WORKSPACE/*
+    
       - name: Check space usage
         if: (!cancelled())
         run: df -hT
@@ -552,7 +555,10 @@ jobs:
 #     runs-on: ubuntu-20.04
     runs-on: ubuntu-20.04-self
 
-    steps:
+    steps:   
+      - name: Clean Up
+        run: rm -rf $GITHUB_WORKSPACE/*
+        
       - name: Check space usage
         if: (!cancelled())
         run: df -hT
