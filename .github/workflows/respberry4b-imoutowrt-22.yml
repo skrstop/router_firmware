@@ -45,7 +45,10 @@ jobs:
 
     steps:    
       - name: Clean Up
-        run: rm -rf $GITHUB_WORKSPACE/*
+        run: |
+          ls -alh
+          pwd
+          rm -rf $GITHUB_WORKSPACE/*
         
       - name: Check space usage
         if: (!cancelled())
@@ -268,7 +271,10 @@ jobs:
 
     steps:    
       - name: Clean Up
-        run: rm -rf $GITHUB_WORKSPACE/*
+        run: |
+          ls -alh
+          pwd
+          rm -rf $GITHUB_WORKSPACE/*
     
       - name: Check space usage
         if: (!cancelled())
@@ -560,7 +566,10 @@ jobs:
 
     steps:   
       - name: Clean Up
-        run: rm -rf $GITHUB_WORKSPACE/*
+        run: |
+          ls -alh
+          pwd
+          rm -rf $GITHUB_WORKSPACE/*
         
       - name: Check space usage
         if: (!cancelled())
