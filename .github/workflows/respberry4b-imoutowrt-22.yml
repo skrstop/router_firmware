@@ -49,6 +49,8 @@ jobs:
           ls -alh
           pwd
           rm -rf $GITHUB_WORKSPACE/*
+          rm -rf $GITHUB_WORKSPACE/.g*
+          ls -alh
         
       - name: Check space usage
         if: (!cancelled())
@@ -275,6 +277,8 @@ jobs:
           ls -alh
           pwd
           rm -rf $GITHUB_WORKSPACE/*
+          rm -rf $GITHUB_WORKSPACE/.g*
+          ls -alh
     
       - name: Check space usage
         if: (!cancelled())
@@ -558,6 +562,11 @@ jobs:
       - name: Check space usage
         if: (!cancelled())
         run: df -hT
+        
+      - name: Umount
+        run: |
+          umount /dev/loop0
+          umount overlay
 
   Upload:
     needs: [ Build, Toolchain ]
@@ -570,6 +579,8 @@ jobs:
           ls -alh
           pwd
           rm -rf $GITHUB_WORKSPACE/*
+          rm -rf $GITHUB_WORKSPACE/.g*
+          ls -alh
         
       - name: Check space usage
         if: (!cancelled())
