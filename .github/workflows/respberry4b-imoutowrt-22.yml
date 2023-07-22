@@ -257,6 +257,9 @@ jobs:
       - name: Check space usage
         if: (!cancelled())
         run: df -hT
+        
+      - name: clean
+        run: rm -rf $GITHUB_WORKSPACE
 
   Build:
     needs: [ Toolchain ]
