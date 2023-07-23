@@ -97,7 +97,7 @@ jobs:
         uses: klever1988/cachewrtbuild@main
         with:
           ccache: 'true'
-          prefix: ${{ github.workspace }}/openwrt
+          prefix: ${{ github.workspace }}/workspace/openwrt
           mixkey: 'bcm27xx-bcm2711'
 
       - name: Check space usage
