@@ -6,7 +6,7 @@
 # Blog: https://p3terx.com
 #=================================================
 
-name: Respberry4B imoutowrt 22.03 self
+name: Respberry4B imoutowrt 22.03 2
 
 on:
   workflow_dispatch:
@@ -21,7 +21,7 @@ env:
   SOURCE_BRANCH: master
   DIY_SH: respberry4b/scripts/custom.sh
   TOOLCHAIN_TAG: toolchain
-  CLASH_BINARY_PLATFORM: armv8
+  CLASH_BINARY_PLATFORM: arm64
   TOOLCHAIN_RELEASE_UPLOAD: true
   FIRMWARE_RELEASE_UPLOAD: true
   FEEDS_CONF: feeds.conf.default
@@ -30,7 +30,7 @@ env:
 
 jobs:
   Build:
-    runs-on: ubuntu-20.04-self
+    runs-on: ubuntu-22.04
 
     outputs:
       OPENWRT_ROOT_PATH: ${{ steps.clone.outputs.OPENWRT_ROOT_PATH }}
@@ -42,31 +42,23 @@ jobs:
       DEVICE_SUBTARGET: ${{ steps.env.outputs.DEVICE_SUBTARGET }}
       TOOLCHAIN_IMAGE: ${{ steps.env.outputs.TOOLCHAIN_IMAGE }}
 
-    steps:       
-      - name: Clean Up
-        run: |
-          ls -alh
-          pwd
-          rm -rf $GITHUB_WORKSPACE/*
-          rm -rf $GITHUB_WORKSPACE/.g*
-          ls -alh
-        
+    steps: 
       - name: Check space usage
         if: (!cancelled())
         run: df -hT
 
-
-      - name: Initialization Environment
+      - name: Initialization environment
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
           sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
           sudo -E apt-get -qq update
-          sudo -E apt-get -qq install rdate squashfs-tools build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 python2.7 unzip zlib1g-dev lib32gcc-s1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget curl swig rsync
+          sudo -E apt-get -qq install $(curl -fsSL bit.ly/3AS48v1)
           sudo -E apt-get -qq autoremove --purge
           sudo -E apt-get -qq clean
-          sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-          mkdir -p workspace
+          sudo timedatectl set-timezone "$TZ"
+          sudo mkdir -p /workdir
+          sudo chown $USER:$GROUPS /workdir
 
       - name: Check space usage
         if: (!cancelled())
@@ -88,80 +80,22 @@ jobs:
           echo "OPENWRT_ROOT_PATH=$PWD" >> $GITHUB_ENV
           echo "OPENWRT_ROOT_PATH=$(echo $PWD)" >> $GITHUB_OUTPUT
 
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
-      - name: Generate Toolchain Config
-        run: |
-          [ -e $CONFIG_FILE ] && mv $CONFIG_FILE $OPENWRT_ROOT_PATH/.config
-          echo -e "\nCONFIG_ALL=y" >> $OPENWRT_ROOT_PATH/.config
-          echo -e "\nCONFIG_ALL_NONSHARED=y" >> $OPENWRT_ROOT_PATH/.config
-          cd $OPENWRT_ROOT_PATH
-          make defconfig > /dev/null 2>&1
+      - name: Cache
+        uses: klever1988/cachewrtbuild@main
+        with:
+          ccache: 'true'
+          prefix: ${{ github.workspace }}/openwrt
+          mixkey: 'bcm27xx-bcm2711'
 
       - name: Check space usage
         if: (!cancelled())
         run: df -hT
 
-      - name: Generate Variables
-        id: env
-        run: |
-          export CURRENT_BRANCH="$(git symbolic-ref --short HEAD)"
-          echo "CURRENT_BRANCH=$CURRENT_BRANCH" >> $GITHUB_ENV
-          echo "CURRENT_BRANCH=$(echo $CURRENT_BRANCH)" >> $GITHUB_OUTPUT
-          cd $OPENWRT_ROOT_PATH
-          export SOURCE_OWNER="$(echo $SOURCE_URL | awk -F '/' '{print $(NF-1)}')"
-          echo "SOURCE_OWNER=$SOURCE_OWNER" >> $GITHUB_ENV
-          echo "SOURCE_OWNER=$(echo $SOURCE_OWNER)" >> $GITHUB_OUTPUT
-          export SOURCE_REPO="$(echo $SOURCE_URL | awk -F '/' '{print $(NF)}')"
-          echo "SOURCE_REPO=$SOURCE_REPO" >> $GITHUB_ENV
-          echo "SOURCE_REPO=$(echo $SOURCE_REPO)" >> $GITHUB_OUTPUT
-          export DEVICE_TARGET=$(cat .config | grep CONFIG_TARGET_BOARD | awk -F '"' '{print $2}')
-          echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
-          echo "DEVICE_TARGET=$(echo $DEVICE_TARGET)" >> $GITHUB_OUTPUT
-          export DEVICE_SUBTARGET=$(cat .config | grep CONFIG_TARGET_SUBTARGET | awk -F '"' '{print $2}')
-          echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
-          echo "DEVICE_SUBTARGET=$(echo $DEVICE_SUBTARGET)" >> $GITHUB_OUTPUT
-          export DEVICE_PLATFORM=$(cat .config | grep CONFIG_TARGET_ARCH_PACKAGES | awk -F '"' '{print $2}')
-          echo "DEVICE_PLATFORM=$DEVICE_PLATFORM" >> $GITHUB_ENV
-          echo "DEVICE_PLATFORM=$(echo $DEVICE_PLATFORM)" >> $GITHUB_OUTPUT
-          export TOOLCHAIN_IMAGE="toolchain-$SOURCE_OWNER-$SOURCE_REPO-$SOURCE_BRANCH-$DEVICE_TARGET-$DEVICE_SUBTARGET"
-          echo "TOOLCHAIN_IMAGE=$TOOLCHAIN_IMAGE" >> $GITHUB_ENV
-          echo "TOOLCHAIN_IMAGE=$(echo $TOOLCHAIN_IMAGE)" >> $GITHUB_OUTPUT
+      - name: Update feeds
+        run: cd $OPENWRT_ROOT_PATH && ./scripts/feeds update -a
 
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
-      - name: Install Feeds
-        if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
-        run: |
-          cd $OPENWRT_ROOT_PATH
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
-          make defconfig
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
-      - name: Compile Tools
-        run: |
-          cd $OPENWRT_ROOT_PATH
-          echo -e "$(nproc) thread compile"
-          make tools/compile -j$(nproc) || make tools/compile -j1 V=s
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
-      - name: Compile Toolchain
-        run: |
-          cd $OPENWRT_ROOT_PATH
-          echo -e "$(nproc) thread compile"
-          make toolchain/compile -j$(nproc) || make toolchain/compile -j1 V=s
-          rm -rf .config* dl bin
+      - name: Install feeds
+        run: cd $OPENWRT_ROOT_PATH && ./scripts/feeds install -a -p mosdns && ./scripts/feeds install -a
 
       - name: Check space usage
         if: (!cancelled())
@@ -196,11 +130,14 @@ jobs:
         if: (!cancelled())
         run: df -hT
 
-      - name: Download DL Package
+      - name: Download package
         id: download
         run: |
           cd $OPENWRT_ROOT_PATH
-          make download -j64
+          make defconfig
+          make download -j8
+          find dl -size -1024c -exec ls -l {} \;
+          find dl -size -1024c -exec rm -f {} \;
 
       - name: Check space usage
         if: (!cancelled())
@@ -210,12 +147,11 @@ jobs:
         run: |
           cd $OPENWRT_ROOT_PATH
           echo -e "$(nproc) thread compile"
-          make buildinfo
-          make diffconfig buildversion feedsversion
-          make target/compile -j$(nproc) IGNORE_ERRORS="m n" BUILD_LOG=1 || \
-          yes n | make target/compile -j1 V=s IGNORE_ERRORS=1
-          make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j1 V=s IGNORE_ERRORS=1
-          make package/index
+          make -j$(nproc) || make -j1 || make -j1 V=s
+          echo "status=success" >> $GITHUB_OUTPUT
+          grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
+          [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
+          echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
       - name: Check space usage
         if: (!cancelled())
