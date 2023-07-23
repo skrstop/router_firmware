@@ -9,7 +9,8 @@
 #sed -i 's/192.168.1.1/192.168.50.5/g' package/base-files/files/bin/config_generate
 
 # Add date version
-export DATE_VERSION=$(date -d "$(rdate -n -4 -p pool.ntp.org)" +'%Y-%m-%d')
+# export DATE_VERSION=$(date -d "$(rdate -n -4 -p pool.ntp.org)" +'%Y-%m-%d')
+export DATE_VERSION=$(date +%F%n%T)
 sed -i "s/%C/%C (${DATE_VERSION})/g" package/base-files/files/etc/openwrt_release
 
 # Modify default LAN ip
