@@ -21,7 +21,7 @@ env:
   SOURCE_BRANCH: master
   DIY_SH: respberry4b/scripts/custom.sh
   TOOLCHAIN_TAG: toolchain
-  CLASH_BINARY_PLATFORM: armv8
+  CLASH_BINARY_PLATFORM: arm64
   TOOLCHAIN_RELEASE_UPLOAD: true
   FIRMWARE_RELEASE_UPLOAD: true
   FEEDS_CONF: feeds.conf.default
@@ -442,11 +442,11 @@ jobs:
 #          cd $OPENWRT_ROOT_PATH
 #          $GITHUB_WORKSPACE/respberry4b/scripts/feeds-add.sh
 
-      - name: Install Feeds
-        run: |
-          cd $OPENWRT_ROOT_PATH
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
+      - name: Update feeds
+        run: cd $OPENWRT_ROOT_PATH && ./scripts/feeds update -a
+
+      - name: Install feeds
+        run: cd $OPENWRT_ROOT_PATH && ./scripts/feeds install -a -p mosdns && ./scripts/feeds install -a
 
       - name: Check space usage
         if: (!cancelled())
