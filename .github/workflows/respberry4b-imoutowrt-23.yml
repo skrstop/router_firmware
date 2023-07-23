@@ -30,8 +30,7 @@ env:
 
 jobs:
   Toolchain:
-    runs-on: ubuntu-20.04
-    #runs-on: self-hosted
+    runs-on: ubuntu-22.04
 
     outputs:
       OPENWRT_ROOT_PATH: ${{ steps.clone.outputs.OPENWRT_ROOT_PATH }}
@@ -55,7 +54,7 @@ jobs:
           swap-size-mb: 1024
           remove-dotnet: 'true'
           remove-android: 'true'
-          remove-haskell: 'true'
+          remove-haskell: 'false'
           remove-codeql: 'false'
           remove-docker-images: 'true'
 
@@ -260,8 +259,7 @@ jobs:
 
   Build:
     needs: [ Toolchain ]
-    runs-on: ubuntu-20.04
-    #runs-on: self-hosted
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Check space usage
@@ -549,8 +547,7 @@ jobs:
 
   Upload:
     needs: [ Build, Toolchain ]
-    runs-on: ubuntu-20.04
-    #runs-on: self-hosted
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Check space usage
