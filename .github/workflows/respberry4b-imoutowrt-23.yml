@@ -273,7 +273,7 @@ jobs:
           swap-size-mb: 1024
           remove-dotnet: 'true'
           remove-android: 'true'
-          remove-haskell: 'true'
+          remove-haskell: 'false'
           remove-codeql: 'false'
           remove-docker-images: 'true'
 
@@ -561,7 +561,7 @@ jobs:
           swap-size-mb: 1024
           remove-dotnet: 'true'
           remove-android: 'true'
-          remove-haskell: 'true'
+          remove-haskell: 'false'
           remove-codeql: 'false'
           remove-docker-images: 'true'
 
