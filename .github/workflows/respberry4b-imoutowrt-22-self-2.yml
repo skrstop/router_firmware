@@ -68,9 +68,9 @@ jobs:
           swap-size-mb: 1024
           remove-dotnet: 'true'
           remove-android: 'true'
-          remove-haskell: 'true'
+          remove-haskell: 'false'
           remove-codeql: 'false'
-          remove-docker-images: 'true'
+          remove-docker-images: 'false'
 
       - name: Check space usage
         if: (!cancelled())
@@ -301,9 +301,9 @@ jobs:
           swap-size-mb: 1024
           remove-dotnet: 'true'
           remove-android: 'true'
-          remove-haskell: 'true'
+          remove-haskell: 'false'
           remove-codeql: 'false'
-          remove-docker-images: 'true'
+          remove-docker-images: 'false'
 
       - name: Check space usage
         if: (!cancelled())
@@ -604,9 +604,9 @@ jobs:
           swap-size-mb: 1024
           remove-dotnet: 'true'
           remove-android: 'true'
-          remove-haskell: 'true'
+          remove-haskell: 'false'
           remove-codeql: 'false'
-          remove-docker-images: 'true'
+          remove-docker-images: 'false'
 
       - name: Check space usage
         if: (!cancelled())
