@@ -76,6 +76,8 @@ jobs:
           sudo timedatectl set-timezone "$TZ"
           sudo mkdir -p workspace
           sudo chown $USER:$GROUPS /workspace
+          sudo python --version
+          sudo python3 --version
 
       - name: Checkout
         uses: actions/checkout@main
@@ -282,6 +284,8 @@ jobs:
           sudo timedatectl set-timezone "$TZ"
           sudo mkdir -p workspace
           sudo chown $USER:$GROUPS /workspace
+          sudo python --version
+          sudo python3 --version
 
       - name: Check space usage
         if: (!cancelled())
