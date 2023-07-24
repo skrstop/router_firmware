@@ -424,6 +424,11 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
+      - name: fix bug
+        run: |
+          chmod +x $GITHUB_WORKSPACE/respberry4b/scripts/*.sh
+          $GITHUB_WORKSPACE/respberry4b/scripts/fix_bug.sh
+
       - name: Check space usage
         if: (!cancelled())
         run: df -hT
