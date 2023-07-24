@@ -9,7 +9,13 @@
 name: Respberry4B imoutowrt 23.05
 
 on:
+  repository_dispatch:
   workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        default: 'false'
   schedule:
     - cron: '0 18 * * *'
   # watch:
@@ -70,7 +76,7 @@ jobs:
         run: |
           sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
           sudo -E apt-get -qq update
-          sudo -E apt-get -qq install squashfs-tools python3 python $(curl -fsSL bit.ly/3AS48v1)
+          sudo -E apt-get -qq install $(curl -fsSL bit.ly/3AS48v1)
           sudo -E apt-get -qq autoremove --purge
           sudo -E apt-get -qq clean
           sudo timedatectl set-timezone "$TZ"
@@ -279,7 +285,7 @@ jobs:
         run: |
           sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
           sudo -E apt-get -qq update
-          sudo -E apt-get -qq install squashfs-tools python3 python $(curl -fsSL bit.ly/3AS48v1)
+          sudo -E apt-get -qq install $(curl -fsSL bit.ly/3AS48v1)
           sudo -E apt-get -qq autoremove --purge
           sudo -E apt-get -qq clean
           sudo timedatectl set-timezone "$TZ"
@@ -408,6 +414,13 @@ jobs:
         run: |
           cd $OPENWRT_ROOT_PATH
           make download -j64
+
+      - name: SSH connection to Actions
+        uses: P3TERX/ssh2actions@v1.0.0
+        if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+        env:
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
       - name: Check space usage
         if: (!cancelled())
