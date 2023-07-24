@@ -47,6 +47,9 @@ jobs:
         if: (!cancelled())
         run: df -hT
 
+      - name: Checkout
+        uses: actions/checkout@main
+
       - name: Maximize build space
         run: |
           sudo chmod u+x $FREE_DISK_SH
@@ -61,8 +64,9 @@ jobs:
       #          remove-codeql: 'false'
       #          remove-docker-images: 'true'
 
-      - name: Checkout
-        uses: actions/checkout@main
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Initialization Environment
         env:
@@ -78,9 +82,6 @@ jobs:
           sudo chown $USER:$GROUPS /workspace
           sudo python --version
           sudo python3 --version
-
-      - name: Checkout
-        uses: actions/checkout@main
 
       - name: Clone Source Code
         id: clone
@@ -240,6 +241,9 @@ jobs:
         if: (!cancelled())
         run: df -hT
 
+      - name: Checkout
+        uses: actions/checkout@main
+
       - name: Maximize build space
         run: |
           sudo chmod u+x $FREE_DISK_SH
@@ -254,8 +258,9 @@ jobs:
       #          remove-codeql: 'false'
       #          remove-docker-images: 'true'
 
-      - name: Checkout
-        uses: actions/checkout@main
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Restore Variables
         run: |
@@ -497,6 +502,9 @@ jobs:
         if: (!cancelled())
         run: df -hT
 
+      - name: Checkout
+        uses: actions/checkout@main
+
       - name: Maximize build space
         run: |
           sudo chmod u+x $FREE_DISK_SH
@@ -511,8 +519,9 @@ jobs:
       #          remove-codeql: 'false'
       #          remove-docker-images: 'true'
 
-      - name: Checkout
-        uses: actions/checkout@main
+      - name: Check space usage
+        if: (!cancelled())
+        run: df -hT
 
       - name: Restore Variables
         run: |
