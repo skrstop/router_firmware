@@ -53,7 +53,7 @@ jobs:
       - name: Maximize build space
         run: |
           sudo chmod u+x $FREE_DISK_SH
-          sudo ./maximize-build-space.sh
+          sudo $FREE_DISK_SH
       #        uses: easimon/maximize-build-space@master
       #        with:
       #          root-reserve-mb: 10240
@@ -247,7 +247,7 @@ jobs:
       - name: Maximize build space
         run: |
           sudo chmod u+x $FREE_DISK_SH
-          sudo ./maximize-build-space.sh
+          sudo $FREE_DISK_SH
       #        uses: easimon/maximize-build-space@master
       #        with:
       #          root-reserve-mb: 10240
@@ -508,7 +508,7 @@ jobs:
       - name: Maximize build space
         run: |
           sudo chmod u+x $FREE_DISK_SH
-          sudo ./maximize-build-space.sh
+          sudo $FREE_DISK_SH
       #        uses: easimon/maximize-build-space@master
       #        with:
       #          root-reserve-mb: 10240
