@@ -81,6 +81,7 @@ jobs:
           sudo -E apt-get -qq clean
           sudo timedatectl set-timezone "$TZ"
           sudo mkdir -p workspace
+          ls -alh
           sudo chown $USER:$GROUPS /workspace
           sudo python --version
           sudo python3 --version
@@ -290,6 +291,7 @@ jobs:
           sudo -E apt-get -qq clean
           sudo timedatectl set-timezone "$TZ"
           sudo mkdir -p workspace
+          ls -alh
           sudo chown $USER:$GROUPS /workspace
           sudo python --version
           sudo python3 --version
