@@ -6,12 +6,12 @@
 # Blog: https://p3terx.com
 #=================================================
 
-name: Respberry4B imoutowrt 22.03
+name: Respberry4B imoutowrt master
 
 on:
   workflow_dispatch:
-#  schedule:
-#    - cron: 0 18 * * *
+  schedule:
+    - cron: '0 18 * * *'
   # watch:
   #   types: started
 
@@ -20,8 +20,8 @@ env:
   SOURCE_URL: https://github.com/immortalwrt/immortalwrt.git
   SOURCE_BRANCH: master
   DIY_SH: respberry4b/scripts/custom.sh
+  FREE_DISK_SH: scripts/free_disk_space.sh
   TOOLCHAIN_TAG: toolchain
-  CLASH_BINARY_PLATFORM: armv8
   TOOLCHAIN_RELEASE_UPLOAD: true
   FIRMWARE_RELEASE_UPLOAD: true
   FEEDS_CONF: feeds.conf.default
@@ -30,8 +30,7 @@ env:
 
 jobs:
   Toolchain:
-#     runs-on: ubuntu-20.04
-    runs-on: ubuntu-20.04-self
+    runs-on: ubuntu-22.04
 
     outputs:
       OPENWRT_ROOT_PATH: ${{ steps.clone.outputs.OPENWRT_ROOT_PATH }}
@@ -43,39 +42,24 @@ jobs:
       DEVICE_SUBTARGET: ${{ steps.env.outputs.DEVICE_SUBTARGET }}
       TOOLCHAIN_IMAGE: ${{ steps.env.outputs.TOOLCHAIN_IMAGE }}
 
-    steps:       
-#       - name: Umount
-#         continue-on-error: true
-#         run: |
-#           sudo umount /dev/loop0
-#           sudo umount overlay
-          
-#       - name: Clean Up
-#         run: |
-#           ls -alh
-#           pwd
-#           rm -rf $GITHUB_WORKSPACE/*
-#           rm -rf $GITHUB_WORKSPACE/.g*
-#           ls -alh
-        
+    steps:
       - name: Check space usage
         if: (!cancelled())
         run: df -hT
 
       - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 10240
-          swap-size-mb: 1024
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'false'
-          remove-docker-images: 'true'
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
+        run: |
+          sudo chmod u+x $FREE_DISK_SH
+          sudo ./maximize-build-space.sh
+      #        uses: easimon/maximize-build-space@master
+      #        with:
+      #          root-reserve-mb: 10240
+      #          swap-size-mb: 1024
+      #          remove-dotnet: 'true'
+      #          remove-android: 'true'
+      #          remove-haskell: 'false'
+      #          remove-codeql: 'false'
+      #          remove-docker-images: 'true'
 
       - name: Initialization Environment
         env:
@@ -83,22 +67,15 @@ jobs:
         run: |
           sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
           sudo -E apt-get -qq update
-          sudo -E apt-get -qq install squashfs-tools build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 python2.7 unzip zlib1g-dev lib32gcc-s1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget curl swig rsync
+          sudo -E apt-get -qq install squashfs-tools $(curl -fsSL bit.ly/3AS48v1)
           sudo -E apt-get -qq autoremove --purge
           sudo -E apt-get -qq clean
-          sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-          mkdir -p workspace
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
+          sudo timedatectl set-timezone "$TZ"
+          sudo mkdir -p workspace
+          sudo chown $USER:$GROUPS /workspace
 
       - name: Checkout
         uses: actions/checkout@main
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
 
       - name: Clone Source Code
         id: clone
@@ -120,10 +97,6 @@ jobs:
           echo -e "\nCONFIG_ALL_NONSHARED=y" >> $OPENWRT_ROOT_PATH/.config
           cd $OPENWRT_ROOT_PATH
           make defconfig > /dev/null 2>&1
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
 
       - name: Generate Variables
         id: env
@@ -172,13 +145,6 @@ jobs:
       - name: Check space usage
         if: (!cancelled())
         run: df -hT
-
-#      - name: Load custom feeds
-#        run: |
-#          [ -e $FEEDS_CONF ] && mv $FEEDS_CONF cd $OPENWRT_ROOT_PATH/feeds.conf.default
-#          chmod +x $GITHUB_WORKSPACE/respberry4b/scripts/feeds-add.sh
-#          cd $OPENWRT_ROOT_PATH
-#          $GITHUB_WORKSPACE/respberry4b/scripts/feeds-add.sh
 
       - name: Install Feeds
         if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
@@ -238,10 +204,6 @@ jobs:
           name: ${{ env.TOOLCHAIN_IMAGE }}
           path: output
 
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
       - name: Delete Old Toolchain Assets From Release
         if: env.TOOLCHAIN_RELEASE_UPLOAD == 'true' && steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
         uses: mknejp/delete-release-assets@v1
@@ -251,10 +213,6 @@ jobs:
           assets: "toolchain-${{ env.TOOLCHAIN_IMAGE }}.*"
           fail-if-no-assets: false
           fail-if-no-release: false
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
 
       - name: Upload Toolchain Image To Release
         if: env.TOOLCHAIN_RELEASE_UPLOAD == 'true' && steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
@@ -268,48 +226,28 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: output/*
 
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
   Build:
     needs: [ Toolchain ]
-#     runs-on: ubuntu-20.04
-    runs-on: ubuntu-20.04-self
+    runs-on: ubuntu-22.04
 
-    steps:    
-#       - name: Umount
-#         continue-on-error: true
-#         run: |
-#           sudo umount /dev/loop0
-#           sudo umount overlay
-          
-#       - name: Clean Up
-#         run: |
-#           ls -alh
-#           pwd
-#           rm -rf $GITHUB_WORKSPACE/*
-#           rm -rf $GITHUB_WORKSPACE/.g*
-#           ls -alh
-    
+    steps:
       - name: Check space usage
         if: (!cancelled())
         run: df -hT
 
       - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 10240
-          swap-size-mb: 1024
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'false'
-          remove-docker-images: 'true'
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
+        run: |
+          sudo chmod u+x $FREE_DISK_SH
+          sudo ./maximize-build-space.sh
+      #        uses: easimon/maximize-build-space@master
+      #        with:
+      #          root-reserve-mb: 10240
+      #          swap-size-mb: 1024
+      #          remove-dotnet: 'true'
+      #          remove-android: 'true'
+      #          remove-haskell: 'false'
+      #          remove-codeql: 'false'
+      #          remove-docker-images: 'true'
 
       - name: Restore Variables
         run: |
@@ -320,7 +258,7 @@ jobs:
           echo "DEVICE_PLATFORM=$(echo '${{needs.Toolchain.outputs.DEVICE_PLATFORM}}')" >> $GITHUB_ENV
           echo "DEVICE_TARGET=$(echo '${{needs.Toolchain.outputs.DEVICE_TARGET}}')" >> $GITHUB_ENV
           echo "DEVICE_SUBTARGET=$(echo '${{needs.Toolchain.outputs.DEVICE_SUBTARGET}}')" >> $GITHUB_ENV
-          echo "TOOLCHAIN_IMAGE=$(echo '${{needs.Toolchain.outputs.TOOLCHAIN_IMAGE}}')" >> $GITHUB_ENV
+          echo "TOOLCHAIN_IMAGE=$(echo '${{needs.Toolchain.outputs.TOOLCHAIN_IMAGE}}')" >> $GITHUB_ENV      
 
       - name: Check space usage
         if: (!cancelled())
@@ -330,47 +268,47 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          cd $GITHUB_WORKSPACE
-          rm -rf *
           sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
           sudo -E apt-get -qq update
-          sudo -E apt-get -qq install squashfs-tools build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 python2.7 unzip zlib1g-dev lib32gcc-s1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget curl swig rsync
+          sudo -E apt-get -qq install squashfs-tools $(curl -fsSL bit.ly/3AS48v1)
           sudo -E apt-get -qq autoremove --purge
           sudo -E apt-get -qq clean
-          sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+          sudo timedatectl set-timezone "$TZ"
+          sudo mkdir -p workspace
+          sudo chown $USER:$GROUPS /workspace
 
       - name: Check space usage
         if: (!cancelled())
         run: df -hT
 
-#      - name: Combine Disks
-#        run: |
-#          sudo swapoff -a
-#          sudo rm -f /mnt/swapfile
-#          export ROOT_FREE_KB=$(df --block-size=1024 --output=avail / | tail -1)
-#          export ROOT_LOOP_KB=$(expr $ROOT_FREE_KB - 1048576)
-#          export ROOT_LOOP_BYTES=$(expr $ROOT_LOOP_KB \* 1024)
-#          sudo fallocate -l $ROOT_LOOP_BYTES /root.img
-#          export ROOT_LOOP_DEVNAME=$(sudo losetup -Pf --show /root.img)
-#          sudo pvcreate -f $ROOT_LOOP_DEVNAME
-#          export MNT_FREE_KB=$(df --block-size=1024 --output=avail /mnt | tail -1)
-#          export MNT_LOOP_KB=$(expr $MNT_FREE_KB - 102400)
-#          export MNT_LOOP_BYTES=$(expr $MNT_LOOP_KB \* 1024)
-#          sudo fallocate -l $MNT_LOOP_BYTES /mnt/mnt.img
-#          export MNT_LOOP_DEVNAME=$(sudo losetup -Pf --show /mnt/mnt.img)
-#          sudo pvcreate -f $MNT_LOOP_DEVNAME
-#          sudo vgcreate vgstorage $ROOT_LOOP_DEVNAME $MNT_LOOP_DEVNAME
-#          sudo lvcreate -n lvstorage -l 100%FREE vgstorage
-#          export LV_DEVNAME=$(sudo lvscan | awk -F "'" '{print $2}')
-#          sudo mkfs.btrfs -L combinedisk $LV_DEVNAME
-#          sudo mount -o compress=zstd $LV_DEVNAME $GITHUB_WORKSPACE
-#          sudo chown -R runner:runner $GITHUB_WORKSPACE
-#          mkdir $GITHUB_WORKSPACE/tmp
-#          chmod 777 $GITHUB_WORKSPACE/tmp
-#          sudo cp -rp /tmp/* $GITHUB_WORKSPACE/tmp
-#          sudo mount -B $GITHUB_WORKSPACE/tmp /tmp
-#          df -hT $GITHUB_WORKSPACE
-#          sudo btrfs filesystem usage $GITHUB_WORKSPACE
+      - name: Combine Disks
+        run: |
+          sudo swapoff -a
+          sudo rm -f /mnt/swapfile
+          export ROOT_FREE_KB=$(df --block-size=1024 --output=avail / | tail -1)
+          export ROOT_LOOP_KB=$(expr $ROOT_FREE_KB - 1048576)
+          export ROOT_LOOP_BYTES=$(expr $ROOT_LOOP_KB \* 1024)
+          sudo fallocate -l $ROOT_LOOP_BYTES /root.img
+          export ROOT_LOOP_DEVNAME=$(sudo losetup -Pf --show /root.img)
+          sudo pvcreate -f $ROOT_LOOP_DEVNAME
+          export MNT_FREE_KB=$(df --block-size=1024 --output=avail /mnt | tail -1)
+          export MNT_LOOP_KB=$(expr $MNT_FREE_KB - 102400)
+          export MNT_LOOP_BYTES=$(expr $MNT_LOOP_KB \* 1024)
+          sudo fallocate -l $MNT_LOOP_BYTES /mnt/mnt.img
+          export MNT_LOOP_DEVNAME=$(sudo losetup -Pf --show /mnt/mnt.img)
+          sudo pvcreate -f $MNT_LOOP_DEVNAME
+          sudo vgcreate vgstorage $ROOT_LOOP_DEVNAME $MNT_LOOP_DEVNAME
+          sudo lvcreate -n lvstorage -l 100%FREE vgstorage
+          export LV_DEVNAME=$(sudo lvscan | awk -F "'" '{print $2}')
+          sudo mkfs.btrfs -L combinedisk $LV_DEVNAME
+          sudo mount -o compress=zstd $LV_DEVNAME $GITHUB_WORKSPACE
+          sudo chown -R runner:runner $GITHUB_WORKSPACE
+          mkdir $GITHUB_WORKSPACE/tmp
+          chmod 777 $GITHUB_WORKSPACE/tmp
+          sudo cp -rp /tmp/* $GITHUB_WORKSPACE/tmp
+          sudo mount -B $GITHUB_WORKSPACE/tmp /tmp
+          df -hT $GITHUB_WORKSPACE
+          sudo btrfs filesystem usage $GITHUB_WORKSPACE
 
       - name: Check space usage
         if: (!cancelled())
@@ -414,10 +352,6 @@ jobs:
           cd $OPENWRT_ROOT_PATH
           git pull
 
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
       - name: Prepare Toolchain Image Form Releases
         if: env.TOOLCHAIN_RELEASE_UPLOAD == 'true'
         run: |
@@ -437,22 +371,11 @@ jobs:
         if: (!cancelled())
         run: df -hT
 
-#      - name: Load custom feeds
-#        run: |
-#          [ -e $FEEDS_CONF ] && mv $FEEDS_CONF cd $OPENWRT_ROOT_PATH/feeds.conf.default
-#          chmod +x $GITHUB_WORKSPACE/respberry4b/scripts/feeds-add.sh
-#          cd $OPENWRT_ROOT_PATH
-#          $GITHUB_WORKSPACE/respberry4b/scripts/feeds-add.sh
-
       - name: Install Feeds
         run: |
           cd $OPENWRT_ROOT_PATH
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
 
       - name: Load Custom Configuration
         run: |
@@ -465,13 +388,9 @@ jobs:
           sed -i 's/36/44/g;s/VHT80/VHT20/g' package/kernel/mac80211/files/lib/wifi/mac80211.sh
           chmod +x $GITHUB_WORKSPACE/respberry4b/scripts/*.sh
           $GITHUB_WORKSPACE/$DIY_SH
-          $GITHUB_WORKSPACE/respberry4b/scripts/preset-clash-core.sh $CLASH_BINARY_PLATFORM
+          $GITHUB_WORKSPACE/respberry4b/scripts/preset-clash-core.sh
           $GITHUB_WORKSPACE/respberry4b/scripts/preset-terminal-tools.sh
           make defconfig
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
 
       - name: Download DL Package
         id: download
@@ -539,18 +458,10 @@ jobs:
           cd $OPENWRT_ROOT_PATH/bin/targets/$DEVICE_TARGET/$DEVICE_SUBTARGET
           cat sha256sums
 
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
       - name: Compress Bin Folder
         run: |
           cd $OPENWRT_ROOT_PATH
           zip -r $DEVICE_TARGET-$DEVICE_SUBTARGET.zip bin
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
 
       - name: Print Disk Usage
         if: always()
@@ -561,65 +472,36 @@ jobs:
           echo 'df -h'
           df -h
 
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
       - name: Upload Bin Archive
         uses: actions/upload-artifact@main
         with:
           name: bin-archive
           path: ${{ env.OPENWRT_ROOT_PATH }}/${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}.zip
 
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-        
-      - name: Umount
-        continue-on-error: true
-        run: |
-          sudo umount /dev/loop0
-          sudo umount overlay
-
   Upload:
     needs: [ Build, Toolchain ]
-#     runs-on: ubuntu-20.04
-    runs-on: ubuntu-20.04-self
+    runs-on: ubuntu-22.04
 
-    steps:   
-#       - name: Clean Up
-#         run: |
-#           ls -alh
-#           pwd
-#           rm -rf $GITHUB_WORKSPACE/*
-#           rm -rf $GITHUB_WORKSPACE/.g*
-#           ls -alh
-        
+    steps:
       - name: Check space usage
         if: (!cancelled())
         run: df -hT
 
       - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 10240
-          swap-size-mb: 1024
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'false'
-          remove-docker-images: 'true'
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
+        run: |
+          sudo chmod u+x $FREE_DISK_SH
+          sudo ./maximize-build-space.sh
+      #        uses: easimon/maximize-build-space@master
+      #        with:
+      #          root-reserve-mb: 10240
+      #          swap-size-mb: 1024
+      #          remove-dotnet: 'true'
+      #          remove-android: 'true'
+      #          remove-haskell: 'false'
+      #          remove-codeql: 'false'
+      #          remove-docker-images: 'true'
       - name: Checkout
         uses: actions/checkout@main
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
 
       - name: Restore Variables
         run: |
@@ -632,17 +514,13 @@ jobs:
           echo "DEVICE_SUBTARGET=$(echo '${{needs.Toolchain.outputs.DEVICE_SUBTARGET}}')" >> $GITHUB_ENV
           echo "TOOLCHAIN_IMAGE=$(echo '${{needs.Toolchain.outputs.TOOLCHAIN_IMAGE}}')" >> $GITHUB_ENV
 
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
       - name: Initialization Environment
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
           sudo -E apt-get -qq update
           sudo -E apt-get -qq install zip unzip rsync
-          sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+          sudo timedatectl set-timezone "$TZ"
 
       - name: Check space usage
         if: (!cancelled())
@@ -695,10 +573,6 @@ jobs:
           bash -c "'mkdir -p $WEB_ROOT_PATH/releases/targets/$DEVICE_TARGET/$DEVICE_SUBTARGET'"
           rsync -chavP --delete -e 'ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no' $SOURCE_TARGETS $HOST:$DEST_TARGETS
 
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
       - name: Deploy Files To Backblaze
         env:
           B2_APPLICATION_KEY: "${{ secrets.B2_APPLICATION_KEY }}"
@@ -712,10 +586,6 @@ jobs:
           b2 authorize-account $B2_APPLICATION_KEY_ID $B2_APPLICATION_KEY
           b2 sync --noProgress --threads 32 --keepDays 7 --replaceNewer $SOURCE_TARGETS $DEST_TARGETS
 
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
       - name: Delete Old Firmware Assets
         if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
         uses: mknejp/delete-release-assets@v1
@@ -726,23 +596,15 @@ jobs:
           fail-if-no-release: false
           assets: "*"
 
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
-
       - name: Deploy Files To Release
         uses: ncipollo/release-action@v1.12.0
         if: env.FIRMWARE_RELEASE_UPLOAD == 'true'
         with:
-          name: respberry4b-imoutowrt-6.1-22.03-${{ env.BUILD_DATE }}
+          name: respberry4b-imoutowrt-master-${{ env.BUILD_DATE }}
           allowUpdates: true
           replacesArtifacts: true
-          tag: respberry4b-imoutowrt-6.1-22.03-${{ env.BUILD_DATE }}
+          tag: respberry4b-imoutowrt-master-${{ env.BUILD_DATE }}
           body: ${{ env.BUILD_DATE }}
           commit: ${{ env.CURRENT_BRANCH }}
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}/*
-
-      - name: Check space usage
-        if: (!cancelled())
-        run: df -hT
