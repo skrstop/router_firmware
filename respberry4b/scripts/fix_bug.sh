@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "staging_dir/host/bin/python3 创建软链接"
+echo "staging_dir/host/bin/python 创建软链接"
 rm -rf $GITHUB_WORKSPACE/workspace/openwrt/staging_dir/host/bin/python
 ln -s /usr/bin/python $GITHUB_WORKSPACE/workspace/openwrt/staging_dir/host/bin/python
 $GITHUB_WORKSPACE/workspace/openwrt/staging_dir/host/bin/python --version
