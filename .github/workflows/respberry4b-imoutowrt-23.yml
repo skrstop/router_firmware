@@ -53,6 +53,9 @@ jobs:
         if: (!cancelled())
         run: df -hT
 
+      - name: Checkout
+        uses: actions/checkout@main
+
       - name: Maximize build space
         run: |
           sudo chmod u+x $FREE_DISK_SH
@@ -66,9 +69,6 @@ jobs:
       #          remove-haskell: 'false'
       #          remove-codeql: 'false'
       #          remove-docker-images: 'true'
-
-      - name: Checkout
-        uses: actions/checkout@main
 
       - name: Initialization Environment
         env:
